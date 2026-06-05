@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>72Hours — If You Go Missing, The Truth Goes Public</title>
+<meta name="description" content="A dead man's switch for truth-tellers. Upload your evidence. Check in every 72 hours. If you go missing — it publishes automatically." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0b;
+    --surface: #111113;
+    --surface2: #18181c;
+    --border: rgba(255,255,255,0.08);
+    --border-bright: rgba(255,255,255,0.18);
+    --red: #e63946;
+    --red-dim: rgba(230,57,70,0.12);
+    --red-glow: rgba(230,57,70,0.25);
+    --amber: #f4a261;
+    --text: #f0ede8;
+    --text-muted: rgba(240,237,232,0.5);
+    --text-dim: rgba(240,237,232,0.25);
+    --mono: 'DM Mono', monospace;
+    --display: 'Bebas Neue', sans-serif;
+    --serif: 'DM Serif Display', serif;
+    --body: 'Outfit', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    font-weight: 300;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ── NOISE GRAIN OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 3rem;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.4s, background 0.4s;
+  }
+  nav.scrolled {
+    background: rgba(10,10,11,0.92);
+    border-color: var(--border);
+    backdrop-filter: blur(16px);
+  }
+  .nav-logo {
+    font-family: var(--display);
+    font-size: 1.6rem;
+    letter-spacing: 0.04em;
+    color: var(--text);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .nav-logo span { color: var(--red); }
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    list-style: none;
+  }
+  .nav-links a {
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    padding: 0.55rem 1.4rem;
+    border: 1px solid var(--red);
+    color: var(--red);
+    background: transparent;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+  }
+  .nav-cta:hover { background: var(--red); color: #fff; }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    padding: 0 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Big background timer */
+  .hero-bg-timer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -52%);
+    font-family: var(--display);
+    font-size: clamp(14rem, 28vw, 26rem);
+    letter-spacing: -0.02em;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(255,255,255,0.04);
+    user-select: none;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  /* Red scan line */
+  .scanline {
+    position: absolute;
+    left: 0; right: 0;
+    height: 1px;
+    background: var(--red);
+    opacity: 0.35;
+    animation: scan 8s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes scan {
+    0% { top: 0%; }
+    100% { top: 100%; }
+  }
+
+  .hero-inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 7rem;
+    position: relative;
+    z-index: 2;
+    max-width: 900px;
+  }
+
+  .hero-tag {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .hero-tag::before {
+    content: '';
+    display: block;
+    width: 2rem;
+    height: 1px;
+    background: var(--red);
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-size: clamp(4.5rem, 10vw, 9rem);
+    line-height: 0.92;
+    letter-spacing: 0.01em;
+    color: var(--text);
+    margin-bottom: 1rem;
+  }
+  h1 em {
+    font-style: italic;
+    font-family: var(--serif);
+    color: var(--red);
+  }
+
+  .hero-sub {
+    font-size: clamp(1rem, 1.5vw, 1.2rem);
+    font-weight: 300;
+    color: var(--text-muted);
+    line-height: 1.7;
+    max-width: 520px;
+    margin-bottom: 2.5rem;
+  }
+
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.9rem 2.2rem;
+    background: var(--red);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: opacity 0.2s, transform 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  .btn-ghost {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.2s;
+  }
+  .btn-ghost:hover { color: var(--text); }
+  .btn-ghost svg { transition: transform 0.2s; }
+  .btn-ghost:hover svg { transform: translateX(3px); }
+
+  /* ── LIVE COUNTER ── */
+  .hero-counter {
+    position: relative;
+    z-index: 2;
+    padding: 1.8rem 0;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+    flex-wrap: wrap;
+  }
+  .counter-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  .counter-stat .num {
+    font-family: var(--display);
+    font-size: 2.2rem;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    color: var(--text);
+  }
+  .counter-stat .num span { color: var(--red); }
+  .counter-stat .label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .counter-divider {
+    width: 1px;
+    height: 2.5rem;
+    background: var(--border);
+  }
+
+  /* ── HOW IT WORKS ── */
+  .section {
+    padding: 7rem 3rem;
+    position: relative;
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .section-label::before {
+    content: '';
+    display: block;
+    width: 1.5rem;
+    height: 1px;
+    background: var(--red);
+  }
+
+  .section-title {
+    font-family: var(--display);
+    font-size: clamp(3rem, 6vw, 5.5rem);
+    line-height: 0.95;
+    letter-spacing: 0.01em;
+    margin-bottom: 1rem;
+  }
+  .section-title em {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--text-muted);
+  }
+
+  /* Steps */
+  .steps {
+    margin-top: 5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0;
+    border: 1px solid var(--border);
+  }
+  .step {
+    padding: 2.5rem 2rem;
+    border-right: 1px solid var(--border);
+    position: relative;
+    transition: background 0.3s;
+  }
+  .step:last-child { border-right: none; }
+  .step:hover { background: var(--surface); }
+
+  .step-num {
+    font-family: var(--display);
+    font-size: 5rem;
+    line-height: 1;
+    color: rgba(255,255,255,0.04);
+    position: absolute;
+    top: 1rem;
+    right: 1.2rem;
+    pointer-events: none;
+  }
+  .step-icon {
+    width: 2.4rem;
+    height: 2.4rem;
+    border: 1px solid var(--red);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+  }
+  .step-icon svg { color: var(--red); }
+  .step h3 {
+    font-family: var(--display);
+    font-size: 1.4rem;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.75rem;
+  }
+  .step p {
+    font-size: 0.88rem;
+    font-weight: 300;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+
+  /* ── VAULT DEMO ── */
+  .vault-section {
+    padding: 7rem 3rem;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .vault-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+    margin-top: 4rem;
+  }
+  .vault-ui {
+    background: var(--bg);
+    border: 1px solid var(--border-bright);
+    padding: 2rem;
+    position: relative;
+  }
+  .vault-ui::before {
+    content: '● ● ●';
+    font-size: 0.5rem;
+    letter-spacing: 0.3em;
+    color: var(--text-dim);
+    position: absolute;
+    top: 0.8rem;
+    left: 1.2rem;
+  }
+  .vault-header {
+    margin-top: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .vault-title {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .vault-status {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    padding: 0.2rem 0.6rem;
+    border: 1px solid rgba(230,57,70,0.4);
+    color: var(--red);
+    letter-spacing: 0.1em;
+    animation: blink 2s ease-in-out infinite;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .vault-timer {
+    padding: 2rem 0 1.5rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .vault-timer-num {
+    font-family: var(--display);
+    font-size: 4rem;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    color: var(--text);
+  }
+  .vault-timer-label {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-top: 0.4rem;
+  }
+  .vault-progress {
+    margin: 1.2rem 0 0;
+    height: 2px;
+    background: var(--border);
+    position: relative;
+  }
+  .vault-progress-bar {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    background: var(--red);
+    width: 62%;
+    transition: width 1s linear;
+  }
+  .vault-files {
+    margin-top: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .vault-file {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0.8rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+  }
+  .vault-file-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--red);
+    flex-shrink: 0;
+  }
+  .vault-file-name { flex: 1; }
+  .vault-file-enc {
+    color: var(--text-dim);
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+  }
+
+  .vault-copy h3 {
+    font-family: var(--display);
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    margin-bottom: 1.5rem;
+  }
+  .vault-copy p {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.75;
+    margin-bottom: 1.25rem;
+  }
+  .vault-copy strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* ── USE CASES ── */
+  .cases-grid {
+    margin-top: 4rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  .case-card {
+    background: var(--bg);
+    padding: 2.2rem 2rem;
+    transition: background 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .case-card:hover { background: var(--surface); }
+  .case-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    height: 2px;
+    width: 0;
+    background: var(--red);
+    transition: width 0.4s ease;
+  }
+  .case-card:hover::after { width: 100%; }
+  .case-tag {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 1rem;
+  }
+  .case-card h4 {
+    font-family: var(--display);
+    font-size: 1.5rem;
+    letter-spacing: 0.03em;
+    margin-bottom: 0.75rem;
+  }
+  .case-card p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+
+  /* ── QUOTE ── */
+  .quote-section {
+    padding: 8rem 3rem;
+    background: var(--red);
+    position: relative;
+    overflow: hidden;
+  }
+  .quote-section::before {
+    content: '"';
+    font-family: var(--serif);
+    font-size: 30rem;
+    line-height: 0.8;
+    color: rgba(0,0,0,0.1);
+    position: absolute;
+    top: -2rem;
+    left: 1rem;
+    pointer-events: none;
+  }
+  .quote-inner {
+    max-width: 800px;
+    position: relative;
+    z-index: 2;
+  }
+  .quote-text {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: clamp(1.6rem, 3vw, 2.5rem);
+    line-height: 1.4;
+    color: #fff;
+    margin-bottom: 1.5rem;
+  }
+  .quote-attr {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.65);
+  }
+
+  /* ── SECURITY ── */
+  .security-list {
+    margin-top: 4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid var(--border);
+  }
+  .security-item {
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    align-items: start;
+    gap: 1.5rem;
+    padding: 1.8rem 2rem;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s;
+  }
+  .security-item:last-child { border-bottom: none; }
+  .security-item:hover { background: var(--surface); }
+  .security-item .icon {
+    width: 2.2rem;
+    height: 2.2rem;
+    border: 1px solid var(--border-bright);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+  .security-item h4 {
+    font-family: var(--display);
+    font-size: 1.2rem;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.4rem;
+  }
+  .security-item p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+
+  /* ── CTA ── */
+  .cta-section {
+    padding: 8rem 3rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-bg {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(230,57,70,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .cta-section h2 {
+    font-family: var(--display);
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+    margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 2;
+  }
+  .cta-section h2 em {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--red);
+  }
+  .cta-section p {
+    font-size: 1rem;
+    color: var(--text-muted);
+    max-width: 480px;
+    margin: 0 auto 2.5rem;
+    line-height: 1.7;
+    position: relative;
+    z-index: 2;
+  }
+  .cta-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2.5rem 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .footer-logo {
+    font-family: var(--display);
+    font-size: 1.3rem;
+    letter-spacing: 0.05em;
+    color: var(--text-dim);
+    text-decoration: none;
+  }
+  .footer-logo span { color: var(--red); }
+  .footer-copy {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+  }
+  .footer-links {
+    display: flex;
+    gap: 1.5rem;
+    list-style: none;
+  }
+  .footer-links a {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    text-decoration: none;
+    transition: color 0.2s;
+    text-transform: uppercase;
+  }
+  .footer-links a:hover { color: var(--text); }
+
+  /* ── ANIMATIONS ── */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .fade-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.5rem; }
+    nav .nav-links { display: none; }
+    .hero, .section, .vault-section, .quote-section, .cta-section { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .vault-grid { grid-template-columns: 1fr; gap: 2rem; }
+    footer { padding: 2rem 1.5rem; flex-direction: column; align-items: flex-start; }
+    .hero-counter { gap: 1.5rem; }
+    .steps { grid-template-columns: 1fr; }
+    .step { border-right: none; border-bottom: 1px solid var(--border); }
+    .step:last-child { border-bottom: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nav-logo">72<span>H</span>ours</a>
+  <ul class="nav-links">
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#vault">The Vault</a></li>
+    <li><a href="#security">Security</a></li>
+    <li><a href="#cases">Use Cases</a></li>
+  </ul>
+  <a href="#signup" class="nav-cta">Create Vault</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-timer" aria-hidden="true">72:00:00</div>
+  <div class="scanline" aria-hidden="true"></div>
+
+  <div class="hero-inner">
+    <p class="hero-tag">Dead man's switch for truth-tellers</p>
+    <h1>If you<br>go <em>missing</em><br>it goes<br>public.</h1>
+    <p class="hero-sub">Upload your evidence. Check in every 72 hours. If the clock hits zero — everything publishes automatically. No one can stop it. Not even us.</p>
+    <div class="hero-actions">
+      <a href="#signup" class="btn-primary">Create Your Vault →</a>
+      <a href="#how" class="btn-ghost">
+        See how it works
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <div class="hero-counter">
+    <div class="counter-stat">
+      <span class="num" id="active-vaults">2<span>,</span>847</span>
+      <span class="label">Active vaults</span>
+    </div>
+    <div class="counter-divider"></div>
+    <div class="counter-stat">
+      <span class="num">38</span>
+      <span class="label">Cases published</span>
+    </div>
+    <div class="counter-divider"></div>
+    <div class="counter-stat">
+      <span class="num">61</span>
+      <span class="label">Countries</span>
+    </div>
+    <div class="counter-divider"></div>
+    <div class="counter-stat">
+      <span class="num">0</span>
+      <span class="label">Backdoors</span>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section" id="how">
+  <p class="section-label fade-up">How it works</p>
+  <h2 class="section-title fade-up">Four steps.<br><em>No exceptions.</em></h2>
+
+  <div class="steps fade-up">
+    <div class="step">
+      <span class="step-num" aria-hidden="true">01</span>
+      <div class="step-icon" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+      </div>
+      <h3>Upload Evidence</h3>
+      <p>Video, audio, documents, photos. Everything is encrypted on your device before it ever leaves your hands. We store the cipher — not the content.</p>
+    </div>
+    <div class="step">
+      <span class="step-num" aria-hidden="true">02</span>
+      <div class="step-icon" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+      </div>
+      <h3>Set Your Timer</h3>
+      <p>Default is 72 hours. You can go up to 30 days. The clock starts the moment your vault is activated. It does not wait for permission.</p>
+    </div>
+    <div class="step">
+      <span class="step-num" aria-hidden="true">03</span>
+      <div class="step-icon" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <h3>Check In With Your Phrase</h3>
+      <p>Enter your secret phrase to reset the clock. Web, mobile, SMS, or email — your choice. Only your phrase can reset it. Not a password recovery. Not support. Nobody.</p>
+    </div>
+    <div class="step">
+      <span class="step-num" aria-hidden="true">04</span>
+      <div class="step-icon" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.36 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.27 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      </div>
+      <h3>If Zero — It Publishes</h3>
+      <p>Your evidence hits the 72Hours public feed, your chosen contacts, and connected platforms simultaneously. Unstoppable. Irreversible. Public forever.</p>
+    </div>
+  </div>
+</section>
+
+<!-- VAULT -->
+<section class="vault-section" id="vault">
+  <div class="vault-grid">
+    <div class="vault-ui fade-up" aria-label="72Hours vault interface preview">
+      <div class="vault-header">
+        <span class="vault-title">Vault · Active</span>
+        <span class="vault-status">● Live</span>
+      </div>
+      <div class="vault-timer">
+        <div class="vault-timer-num" id="demo-timer">47:22:09</div>
+        <div class="vault-timer-label">Hours remaining before publish</div>
+        <div class="vault-progress">
+          <div class="vault-progress-bar" id="demo-bar"></div>
+        </div>
+      </div>
+      <div class="vault-files">
+        <div class="vault-file">
+          <div class="vault-file-dot"></div>
+          <span class="vault-file-name">evidence_video_001.mp4</span>
+          <span class="vault-file-enc">AES-256</span>
+        </div>
+        <div class="vault-file">
+          <div class="vault-file-dot"></div>
+          <span class="vault-file-name">witness_audio.m4a</span>
+          <span class="vault-file-enc">AES-256</span>
+        </div>
+        <div class="vault-file">
+          <div class="vault-file-dot"></div>
+          <span class="vault-file-name">documents_scan.pdf</span>
+          <span class="vault-file-enc">AES-256</span>
+        </div>
+        <div class="vault-file">
+          <div class="vault-file-dot" style="background: var(--text-dim);"></div>
+          <span class="vault-file-name" style="color: var(--text-dim);">+ Add more files</span>
+          <span class="vault-file-enc"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="vault-copy fade-up">
+      <h3>Your vault.<br>Your rules.<br>Your key.</h3>
+      <p>Files are encrypted <strong>on your device</strong> before upload using AES-256-GCM. Your secret phrase is never stored — only a salted hash. Even if our servers were seized tomorrow, your files are unreadable without you.</p>
+      <p>Set custom publish targets: the 72Hours public feed, your lawyer's email, a Signal group, a Telegram channel. When the clock hits zero, everything fires at once.</p>
+      <p>Add a <strong>trusted backup keyholder</strong> — someone who can reset the clock on your behalf if you're unable to. They never see your files. They just hold the key.</p>
+    </div>
+  </div>
+</section>
+
+<!-- USE CASES -->
+<section class="section" id="cases">
+  <p class="section-label fade-up">Who it's for</p>
+  <h2 class="section-title fade-up">Truth has<br><em>many faces.</em></h2>
+
+  <div class="cases-grid fade-up">
+    <div class="case-card">
+      <p class="case-tag">Journalism</p>
+      <h4>Dangerous Investigations</h4>
+      <p>A journalist embedded in a conflict zone. Daily check-ins. If they stop — the investigation publishes. Their story cannot be buried with them.</p>
+    </div>
+    <div class="case-card">
+      <p class="case-tag">Personal Safety</p>
+      <h4>Kidnapping & Abduction</h4>
+      <p>"I've recorded everything. If I'm not free in 72 hours, the world will know who took me and why." Leverage is protection.</p>
+    </div>
+    <div class="case-card">
+      <p class="case-tag">Whistleblowing</p>
+      <h4>Corporate & Government Crimes</h4>
+      <p>Upload the documents before you come forward. Know that even if they silence you — the evidence is already out of their reach.</p>
+    </div>
+    <div class="case-card">
+      <p class="case-tag">Activism</p>
+      <h4>Authoritarian Regimes</h4>
+      <p>Activists in countries where disappearing is a policy. Their vault is their shield — and their final testimony if that shield fails.</p>
+    </div>
+    <div class="case-card">
+      <p class="case-tag">Witness Protection</p>
+      <h4>Crime Documentation</h4>
+      <p>Witnessed something dangerous. Deposit the evidence safely before going to authorities. Ensure it can't be lost, seized, or destroyed.</p>
+    </div>
+    <div class="case-card">
+      <p class="case-tag">Any Threat</p>
+      <h4>"It's Already Uploaded"</h4>
+      <p>The most powerful sentence a threatened person can say. The moment you activate your vault, the leverage shifts to you.</p>
+    </div>
+  </div>
+</section>
+
+<!-- QUOTE -->
+<section class="quote-section">
+  <div class="quote-inner">
+    <p class="quote-text">"The most dangerous moment is right before you speak. After you speak, you're already free."</p>
+    <p class="quote-attr">The principle behind 72Hours</p>
+  </div>
+</section>
+
+<!-- SECURITY -->
+<section class="section" id="security">
+  <p class="section-label fade-up">Security model</p>
+  <h2 class="section-title fade-up">We can't<br><em>stop it either.</em></h2>
+
+  <div class="security-list fade-up">
+    <div class="security-item">
+      <div class="icon" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <div>
+        <h4>Client-Side Encryption</h4>
+        <p>Files are encrypted on your device using AES-256-GCM before upload. Your encryption key is derived from your secret phrase, which never leaves your device. We receive encrypted bytes. Nothing more.</p>
+      </div>
+    </div>
+    <div class="security-item">
+      <div class="icon" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <div>
+        <h4>No Secret Storage</h4>
+        <p>Your secret phrase is never stored — only a salted SHA-256 hash used to verify check-ins. There is no "forgot my phrase" flow. This is intentional. Recovery would require storing it. We don't.</p>
+      </div>
+    </div>
+    <div class="security-item">
+      <div class="icon" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
+      </div>
+      <div>
+        <h4>Autonomous Publish Trigger</h4>
+        <p>The publish job is a scheduled cron — it does not require a human to approve or trigger. Even if our team were unavailable, arrested, or coerced, the timer would still fire.</p>
+      </div>
+    </div>
+    <div class="security-item">
+      <div class="icon" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </div>
+      <div>
+        <h4>Distributed & Open Source</h4>
+        <p>The entire codebase is open source. Anyone can audit it. Publish targets span multiple platforms and jurisdictions — a court order against one node doesn't stop the others. The architecture is built to resist suppression.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="signup">
+  <div class="cta-bg" aria-hidden="true"></div>
+  <h2>Your truth<br><em>deserves</em><br>to survive you.</h2>
+  <p>Create your vault in under 3 minutes. Free for individuals. No credit card. No identity verification required.</p>
+  <div class="cta-buttons">
+    <a href="#" class="btn-primary">Create Your Vault — Free</a>
+    <a href="https://github.com" class="btn-ghost" target="_blank" rel="noopener">
+      View on GitHub
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <a href="#" class="footer-logo">72<span>H</span>ours</a>
+  <ul class="footer-links">
+    <li><a href="#">GitHub</a></li>
+    <li><a href="#">Security</a></li>
+    <li><a href="#">Privacy</a></li>
+    <li><a href="#">Legal</a></li>
+    <li><a href="#">Contact</a></li>
+  </ul>
+  <p class="footer-copy">Open source. MIT Licensed. Built for those who need it most.</p>
+</footer>
+
+<script>
+  // NAV scroll effect
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  // Fade-up on scroll
+  const fadeEls = document.querySelectorAll('.fade-up');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  fadeEls.forEach(el => observer.observe(el));
+
+  // Demo timer countdown
+  let secs = 47 * 3600 + 22 * 60 + 9;
+  const timerEl = document.getElementById('demo-timer');
+  const barEl = document.getElementById('demo-bar');
+  setInterval(() => {
+    if (secs > 0) secs--;
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    const s = secs % 60;
+    timerEl.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    const pct = (secs / (72 * 3600)) * 100;
+    barEl.style.width = pct + '%';
+  }, 1000);
+</script>
+
+</body>
+</html>
