@@ -2,7 +2,7 @@
 
 > **If you go missing, the truth goes public.**
 
-72Hours is an open-source dead man's switch platform for journalists, activists, whistleblowers, and anyone whose safety depends on the world knowing what they know. Upload your evidence — video, audio, documents, photos — set your timer, enter your secret phrase regularly to reset it. If 72 hours pass without your check-in, everything publishes automatically.
+72Hours is a dead man's switch platform for journalists, activists, whistleblowers, and anyone whose safety depends on the world knowing what they know. Upload your evidence — video, audio, documents, photos — set your timer, enter your secret phrase regularly to reset it. If 72 hours pass without your check-in, everything publishes automatically.
 
 ---
 
@@ -86,84 +86,46 @@ Content auto-publishes to: 72Hours public feed + connected news outlets + social
 
 ---
 
+## Project Structure
+
+```
+72Hrs/
+├── index.html          # Landing page (HTML + CSS + JS)
+├── README.md           # Project documentation
+└── LICENSE             # MIT License
+```
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
 |---|---|
-| Frontend | Next.js 14 (App Router) + TypeScript |
-| Styling | Tailwind CSS + shadcn/ui |
-| Backend | Next.js API Routes + Node.js |
-| Database | Supabase (Postgres + Auth + Realtime) |
-| File Storage | Cloudinary (media) + Supabase Storage (docs) |
-| Encryption | AES-256-GCM client-side encryption before upload |
-| Scheduling | Supabase Edge Functions + cron jobs (timer logic) |
-| Email/SMS | Resend (email) + Twilio (SMS check-ins) |
-| AI Features | Anthropic Claude API (summaries, tagging, translation) |
-| Deployment | Vercel (frontend) + Supabase (backend) |
-| CDN | Cloudflare (DDoS protection + global distribution) |
+| Frontend | Static HTML5 + Vanilla JavaScript |
+| Styling | Custom CSS (CSS Variables, Grid, Flexbox) |
+| Icons | Inline SVG |
+| Fonts | Google Fonts (Bebas Neue, DM Serif Display, DM Mono, Outfit) |
+| Hosting | Any static host (Netlify, Vercel, Cloudflare Pages, GitHub Pages) |
 
 ---
 
-## Project Structure
+## Getting Started
 
-```
-72hours/
-├── app/                          # Next.js App Router
-│   ├── (public)/                 # Public-facing pages
-│   │   ├── page.tsx              # Landing page
-│   │   ├── feed/                 # Public news feed
-│   │   │   ├── page.tsx          # All cases
-│   │   │   └── [caseId]/         # Individual case page
-│   │   └── about/                # About + how it works
-│   ├── (auth)/                   # Auth pages
-│   │   ├── login/
-│   │   └── signup/
-│   └── (dashboard)/              # Authenticated user area
-│       ├── vault/                # Upload and manage files
-│       ├── timer/                # Set and manage countdown
-│       ├── publish-settings/     # Configure publish targets
-│       └── trusted-contacts/     # Backup keyholders
-├── components/
-│   ├── ui/                       # shadcn/ui base components
-│   ├── vault/                    # File upload, encryption UI
-│   ├── timer/                    # Countdown display, check-in
-│   ├── feed/                     # News feed, case cards
-│   └── shared/                   # Navbar, footer, layout
-├── lib/
-│   ├── crypto.ts                 # Client-side encryption utils
-│   ├── supabase.ts               # DB client
-│   ├── timer.ts                  # Timer logic
-│   ├── publisher.ts              # Auto-publish engine
-│   └── ai.ts                     # Claude API integration
-├── supabase/
-│   ├── migrations/               # DB schema
-│   └── functions/                # Edge functions (timer cron)
-├── public/
-└── README.md
+### View Locally
+
+```bash
+# Open directly in browser
+open index.html
 ```
 
----
+Or serve with any static server:
 
-## Database Schema (Overview)
+```bash
+# Python
+python3 -m http.server 3000
 
-```sql
--- Users
-users (id, email, secret_phrase_hash, created_at, plan)
-
--- Vaults (one per user, holds their case)
-vaults (id, user_id, title, description, status, publish_at, timer_hours, last_checkin, created_at)
-
--- Files inside a vault
-vault_files (id, vault_id, name, type, size, encrypted_url, thumbnail_url, transcript, created_at)
-
--- Published cases (public)
-published_cases (id, vault_id, title, summary, tags, country, published_at, view_count)
-
--- Check-in log
-checkins (id, vault_id, method, timestamp, ip_hash)
-
--- Trusted contacts
-trusted_contacts (id, vault_id, name, email, phone, role)
+# Node.js
+npx serve .
 ```
 
 ---
@@ -218,66 +180,6 @@ trusted_contacts (id, vault_id, name, email, phone, role)
 
 ---
 
-## Getting Started (Development)
-
-### Prerequisites
-- Node.js 18+
-- A Supabase project
-- A Cloudinary account
-- Anthropic API key (for AI features)
-
-### Setup
-
-```bash
-# Clone the repo
-git clone https://github.com/yourusername/72hours.git
-cd 72hours
-
-# Install dependencies
-npm install
-
-# Set up environment variables
-cp .env.example .env.local
-# Fill in your Supabase, Cloudinary, Anthropic, Resend, Twilio keys
-
-# Run database migrations
-npx supabase db push
-
-# Start dev server
-npm run dev
-```
-
-### Environment Variables
-
-```env
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-
-# Cloudinary
-NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-
-# Anthropic (AI features)
-ANTHROPIC_API_KEY=
-
-# Resend (email)
-RESEND_API_KEY=
-
-# Twilio (SMS check-ins)
-TWILIO_ACCOUNT_SID=
-TWILIO_AUTH_TOKEN=
-TWILIO_PHONE_NUMBER=
-
-# App
-NEXTAUTH_SECRET=
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
-
----
-
 ## Contributing
 
 72Hours is built for human rights. Contributions are welcome — especially from:
@@ -285,8 +187,6 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - Journalists and activists (shape the features)
 - Developers in high-risk countries (build the Tor integration)
 - Translators (make the UI accessible globally)
-
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
 
 ---
 
